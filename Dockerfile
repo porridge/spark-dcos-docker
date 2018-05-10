@@ -13,7 +13,7 @@ ARG CONDA_INSTALLER="Miniconda3-4.3.31-Linux-x86_64.sh"
 ARG CONDA_MD5="7fe70b214bee1143e3e3f0467b71453c"
 ARG CONDA_URL="https://repo.continuum.io/miniconda"
 ARG DCOS_COMMONS_URL="https://downloads.mesosphere.com/dcos-commons"
-ARG DCOS_COMMONS_VERSION="0.40.5"
+ARG DCOS_COMMONS_VERSION="0.41.0"
 ARG DISTRO="debian"
 ARG DEBCONF_NONINTERACTIVE_SEEN="true"
 ARG DEBIAN_FRONTEND="noninteractive"
@@ -26,9 +26,10 @@ ARG HADOOP_MAJOR_VERSION="2.7"
 ARG HADOOP_SHA256="0bfc4d9b04be919be2fdf36f67fa3b4526cdbd406c512a7a1f5f1b715661f831"
 ARG HADOOP_URL="https://s3-us-west-1.amazonaws.com/svt-dev/downloads"
 ARG HADOOP_VERSION="2.7.5"
+ARG HOME="/root"
 ARG JAVA_HOME="/opt/jdk"
 ARG JAVA_URL="https://downloads.mesosphere.com/java"
-ARG JAVA_VERSION="8u162"
+ARG JAVA_VERSION="8u172"
 ARG LANG="en_US.UTF-8"
 ARG LANGUAGE="en_US.UTF-8"
 ARG LC_ALL="en_US.UTF-8"
@@ -41,13 +42,13 @@ ARG MESOS_MAVEN_URL="https://repo1.maven.org/maven2/org/apache/mesos/mesos"
 ARG MESOS_PROTOBUF_JAR_SHA1="189ef74959049521be8f5a1c3de3921eb0117ffb"
 ARG MESOS_VERSION="1.5.0"
 ARG REPO="http://cdn-fastly.deb.debian.org"
+ARG SPARK_DCOS_VERSION="2.2.1-1.11.0"
 ARG SPARK_DIST_URL="https://downloads.mesosphere.com/spark"
 ARG SPARK_HOME="/opt/spark"
 ARG SPARK_VERSION="2.2.1-2"
 ARG TENSORFLOW_SERVING_APT_URL="http://storage.googleapis.com/tensorflow-serving-apt"
-ARG TENSORFLOW_SERVING_VERSION=1.5.0
+ARG TENSORFLOW_SERVING_VERSION="1.5.0"
 ARG VCS_REF
-ARG SPARK_DCOS_VERSION="2.2.1-1.11.0"
 
 LABEL maintainer="Vishnu Mohan <vishnu@mesosphere.com>" \
       org.label-schema.build-date="${BUILD_DATE}" \
@@ -67,6 +68,7 @@ ENV BOOTSTRAP="${MESOSPHERE_PREFIX}/bin/bootstrap" \
     DISTRO=${DISTRO:-"debian"} \
     GPG_KEYSERVER=${GPG_KEYSERVER:-"hkps://zimmermann.mayfirst.org"} \
     HADOOP_HDFS_HOME=${HADOOP_HDFS_HOME:-"/opt/hadoop"} \
+    HOME=${HOME:-"/root"} \
     JAVA_HOME=${JAVA_HOME:-"/opt/jdk"} \
     LANG=${LANG:-"en_US.UTF-8"} \
     LANGUAGE=${LANGUAGE:-"en_US.UTF-8"} \
@@ -170,6 +172,7 @@ RUN cd /tmp \
     && ${CONDA_DIR}/bin/conda update --json --all -yq \
     && ${CONDA_DIR}/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
     && ${CONDA_DIR}/bin/conda clean --json -tipsy \
+    && rm -rf "${HOME}/.cache/pip" "${HOME}/.cache/yarn" "${HOME}/.node-gyp" \
     && rm -rf /tmp/*
 
 COPY runit/service /var/lib/runit/service
@@ -195,6 +198,9 @@ RUN mkdir -p /var/lib/nginx \
     && cp "${CONDA_DIR}/share/examples/krb5/krb5.conf" /etc \
     && chmod ugo+rw /etc/krb5.conf
 
-ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${MESOSPHERE_PREFIX}/libmesos-bundle/lib:${JAVA_HOME}/jre/lib/amd64/server"
+RUN mv /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0 /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0.bak \
+    && cp "${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libcurl.so.4" /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0
+
+ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${MESOSPHERE_PREFIX}/libmesos-bundle/lib:${JAVA_HOME}/jre/lib/amd64/server"
 
 WORKDIR "${SPARK_HOME}"
