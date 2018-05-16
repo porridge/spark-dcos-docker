@@ -120,33 +120,96 @@ RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
 
 RUN cd /tmp \
     && mkdir -p "${CONDA_DIR}" "${HADOOP_HDFS_HOME}" "${JAVA_HOME}" "${MESOSPHERE_PREFIX}/bin" "${SPARK_HOME}" \
+    && echo done
+
+RUN cd /tmp \
     && curl --retry 3 -fsSL -O "${LIBMESOS_BUNDLE_URL}/libmesos-bundle-${LIBMESOS_BUNDLE_VERSION}.tar.gz" \
+    && echo done
+
+RUN cd /tmp \
     && echo "${LIBMESOS_BUNDLE_SHA256}" "libmesos-bundle-${LIBMESOS_BUNDLE_VERSION}.tar.gz" | sha256sum -c - \
+    && echo done
+
+RUN cd /tmp \
     && tar xf "libmesos-bundle-${LIBMESOS_BUNDLE_VERSION}.tar.gz" -C "${MESOSPHERE_PREFIX}" \
-    && cd "${MESOSPHERE_PREFIX}/libmesos-bundle/lib" \
+    && echo done
+
+RUN cd "${MESOSPHERE_PREFIX}/libmesos-bundle/lib" \
     && curl --retry 3 -fsSL -O "${MESOS_MAVEN_URL}/${MESOS_VERSION}/mesos-${MESOS_VERSION}.jar" \
+    && echo done
+
+RUN cd "${MESOSPHERE_PREFIX}/libmesos-bundle/lib" \
     && echo "${MESOS_JAR_SHA1} mesos-${MESOS_VERSION}.jar" | sha1sum -c - \
+    && echo done
+
+RUN cd "${MESOSPHERE_PREFIX}/libmesos-bundle/lib" \
     && curl --retry 3 -fsSL -O "${MESOS_MAVEN_URL}/${MESOS_VERSION}/mesos-${MESOS_VERSION}-shaded-protobuf.jar" \
+    && echo done
+
+RUN cd "${MESOSPHERE_PREFIX}/libmesos-bundle/lib" \
     && echo "${MESOS_PROTOBUF_JAR_SHA1} mesos-${MESOS_VERSION}-shaded-protobuf.jar" | sha1sum -c - \
-    && cd /tmp \
+    && echo done
+
+RUN cd /tmp \
     && curl --retry 3 -fsSL -O "${DCOS_COMMONS_URL}/artifacts/${DCOS_COMMONS_VERSION}/bootstrap.zip" \
+    && echo done
+
+RUN cd /tmp \
     && echo "${DCOS_COMMONS_URL}/artifacts/${DCOS_COMMONS_VERSION}/bootstrap.zip" \
+    && echo done
+
+RUN cd /tmp \
     && unzip "bootstrap.zip" -d "${MESOSPHERE_PREFIX}/bin/" \
+    && echo done
+
+RUN cd /tmp \
     && curl --retry 3 -fsSL -O "${JAVA_URL}/server-jre-${JAVA_VERSION}-linux-x64.tar.gz" \
+    && echo done
+
+RUN cd /tmp \
     && echo "${JAVA_URL}/server-jre-${JAVA_VERSION}-linux-x64.tar.gz" \
+    && echo done
+
+RUN cd /tmp \
     && tar xf "server-jre-${JAVA_VERSION}-linux-x64.tar.gz" -C "${JAVA_HOME}" --strip-components=1 \
+    && echo done
+
+RUN cd /tmp \
     && curl --retry 3 -fsSL -O "${HADOOP_URL}/hadoop-${HADOOP_VERSION}.tar.gz" \
+    && echo done
+
+RUN cd /tmp \
     && echo "${HADOOP_SHA256}" "hadoop-${HADOOP_VERSION}.tar.gz" | sha256sum -c - \
+    && echo done
+
+RUN cd /tmp \
     && tar xf "hadoop-${HADOOP_VERSION}.tar.gz" -C "${HADOOP_HDFS_HOME}" --strip-components=1 \
+    && echo done
+
+RUN cd /tmp \
     && curl --retry 3 -fsSL -O "https://s3-us-west-1.amazonaws.com/svt-dev/spark-2.2.1-bin-2.6.5-minGpu.tgz" \
+    && echo done
+
+RUN cd /tmp \
     && echo "spark-2.2.1-bin-2.6.5-minGpu.tgz" \
+    && echo done
+
+RUN cd /tmp \
     && tar xf "spark-2.2.1-bin-2.6.5-minGpu.tgz" -C "${SPARK_HOME}" --strip-components=1 \
-    && cd "${SPARK_HOME}/jars" \
+    && echo done
+
+RUN cd "${SPARK_HOME}/jars" \
     && curl --retry 3 -fsSL -O "${AWS_JAVA_SDK_URL}/${AWS_JAVA_SDK_VERSION}/aws-java-sdk-${AWS_JAVA_SDK_VERSION}.jar" \
+    && echo done
+
+RUN cd "${SPARK_HOME}/jars" \
     && echo "${AWS_JAVA_SDK_JAR_SHA1} aws-java-sdk-${AWS_JAVA_SDK_VERSION}.jar" | sha1sum -c - \
+    && echo done
+
+RUN cd "${SPARK_HOME}/jars" \
     && curl --retry 3 -fsSL -O "${HADOOP_AWS_URL}/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar" \
     && echo "${HADOOP_AWS_JAR_SHA1} hadoop-aws-${HADOOP_AWS_VERSION}.jar" | sha1sum -c - \
-    && rm -rf /tmp/*
+    && echo done
 
 RUN echo "deb [arch=amd64] ${TENSORFLOW_SERVING_APT_URL} stable tensorflow-model-server tensorflow-model-server-universal" > /etc/apt/sources.list.d/tensorflow-serving.list \
     && curl --retry 3 -fsSL ${TENSORFLOW_SERVING_APT_URL}/tensorflow-serving.release.pub.gpg | apt-key add - \
